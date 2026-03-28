@@ -1,5 +1,6 @@
 package com.dating.app.dto;
 
+import com.dating.app.models.enums.Gender;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -10,7 +11,7 @@ public class UserRegistrationRequestDTO {
     private String password;
     private String name;
     private LocalDate birthday;
-    private String gender;
-    private String targetGender;
+    private Gender gender;
+    private Gender targetGender;
     private String city;
 }
