@@ -1,14 +1,31 @@
 package com.dating.app.services;
 
+import com.dating.app.engine.ArcanaCalculator;
+import com.dating.app.models.Match;
+import com.dating.app.models.User;
+import com.dating.app.repositories.MatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MatchService {
-    void createMatch(UUID user1Id, UUID user2Id) {
-        // TODO
+    private final MatchRepository matchRepository;
+    private final ArcanaCalculator arcanaCalculator;
+
+    public Match createMatch(User user1, User user2) {
+        // Calculate pair arcana
+        Integer pairArcana = arcanaCalculator.calculateCompatibility(
+                user1.getMainArcana(),
+                user2.getMainArcana()
+        );
+
+        Match match = Match.builder()
+                .userOneId(user1.getId())
+                .userTwoId(user2.getId())
+                .pairArcana(pairArcana)
+                .build();
+
+        return matchRepository.save(match);
     }
 }
