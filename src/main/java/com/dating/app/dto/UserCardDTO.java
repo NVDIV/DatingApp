@@ -12,5 +12,6 @@ public class UserCardDTO {
     private String mainPhotoUrl;
     private Integer mainArcana;
     private Integer compatibilityPercent; // Calculated on the fly!
+    private String pairDescription;       // Calculated on the fly!
     private String pairArcanaName;        // Calculated on the fly!
 }
