@@ -84,7 +84,7 @@ public class FeedService {
         );
 
         // Get Arcana from DB
-        var arcanaMeaning = arcanaMeaningRepository.findByArcaneNumber(pairArcana)
+        var arcanaMeaning = arcanaMeaningRepository.findByArcanaNumber(pairArcana)
                 .orElseThrow(() -> new RuntimeException("Arcana not found in DB for number: " + pairArcana));
 
         // Set pair arcana and compatability
