@@ -2,6 +2,7 @@ package com.dating.app.controllers;
 
 import com.dating.app.dto.LoginRequestDTO;
 import com.dating.app.dto.UserRegistrationRequestDTO;
+import com.dating.app.dto.UserResponseDTO;
 import com.dating.app.models.User;
 import com.dating.app.services.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody UserRegistrationRequestDTO request) {
-        return ResponseEntity.ok(authService.register(request));
+    public ResponseEntity<UserResponseDTO> register(@RequestBody UserRegistrationRequestDTO request) {
+        User user = authService.register(request);
+        return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody LoginRequestDTO request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<UserResponseDTO> login(@RequestBody LoginRequestDTO request) {
+        User user = authService.login(request);
+        return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
     }
 }
