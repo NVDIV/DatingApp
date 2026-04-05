@@ -14,17 +14,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/feed")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000") // React
 public class FeedController {
 
     private final FeedService feedService;
     private final UserRepository userRepository;
 
     @GetMapping
-    public ResponseEntity<List<UserCardDTO>> getDiscoveryFeed(@RequestParam UUID userId) {
-        // TODO: SpringSecurity
-
-        User currentUser = userRepository.findById(userId)
+    public ResponseEntity<List<UserCardDTO>> getDiscoveryFeed(java.security.Principal principal) {
+        User currentUser = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<UserCardDTO> feed = feedService.getDiscoveryFeed(currentUser, 20);
