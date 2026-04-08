@@ -1,0 +1,31 @@
+:root {
+  --bg-color: #0f0c29; /* Глибокий нічний колір */
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --primary-gold: #d4af37;
+  --text-color: #ffffff;
+  --error-color: #ff4d4d;
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --transition: all 0.3s ease;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+h2 {
+  color: var(--primary-gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+input, button {
+  font-family: inherit;
+}

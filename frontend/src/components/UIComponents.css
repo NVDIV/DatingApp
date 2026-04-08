@@ -1,0 +1,70 @@
+.custom-input {
+  background: var(--input-bg);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 12px 15px;
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 15px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.custom-input:focus {
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+}
+
+.custom-button {
+  background: var(--primary-gold);
+  color: #000;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+}
+
+.custom-button:hover {
+  background: #f1c40f;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+}
+
+.custom-select {
+  background: var(--input-bg);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 12px 15px;
+  border-radius: 8px;
+  color: white;
+  margin-bottom: 15px;
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition);
+  appearance: none; /* Прибираємо стандартну стрілку */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1em;
+}
+
+.custom-select:focus {
+  border-color: var(--primary-gold);
+}
+
+.select-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  text-align: left;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--primary-gold);
+  margin-bottom: 5px;
+  margin-left: 5px;
+  text-transform: uppercase;
+}
