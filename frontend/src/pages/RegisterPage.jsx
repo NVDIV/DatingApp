@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // Импорт контекста
 import api from '../api/axiosConfig';
 import { Input, Button } from '../components/UIComponents';
 import '../styles/auth.css';
 
 export default function RegisterPage() {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         name: '', email: '', password: '',
         birthday: '', city: '',
         gender: 'MALE', targetGender: 'ANY'
     });
-    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,13 +21,21 @@ export default function RegisterPage() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
         try {
             const response = await api.post('/auth/register', formData);
-            localStorage.setItem('token', response.data.token);
-            // Після реєстрації одразу на онбординг
+            
+            // Вызываем login из контекста, чтобы приложение "увидело" юзера
+            await login(response.data); 
+            
+            // После регистрации сразу на онбординг
             navigate('/onboarding');
         } catch (error) {
             alert("Помилка реєстрації: " + (error.response?.data?.message || "Перевірте дані"));
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -59,7 +70,9 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    <Button type="submit" style={{ marginTop: '20px' }}>Створити долю</Button>
+                    <Button type="submit" disabled={isSubmitting} style={{ marginTop: '20px' }}>
+                        {isSubmitting ? "Створення..." : "Створити долю"}
+                    </Button>
                 </form>
                 <div className="auth-footer">
                     Вже зареєстровані? <Link to="/login" className="auth-link">Увійти</Link>

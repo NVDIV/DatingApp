@@ -1,0 +1,77 @@
+/* src/components/Navbar.css */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: rgba(10, 9, 18, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(212, 175, 55, 0.3);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 1000;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.nav-item {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition);
+    flex: 1;
+    text-align: center;
+}
+
+/* Ефект при наведенні або активному стані */
+.nav-item:hover {
+    color: var(--primary-gold);
+    text-shadow: 0 0 8px var(--gold-glow);
+}
+
+.nav-item i {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+}
+
+.logout-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 77, 77, 0.3);
+    color: #ff4d4d;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 77, 77, 0.1);
+    border-color: #ff4d4d;
+}
+
+/* Додамо трохи місця внизу сторінок, щоб навбар не перекривав контент */
+@media (max-width: 768px) {
+    .page-with-nav {
+        padding-bottom: 80px;
+    }
+}
+
+.nav-item.active {
+    color: var(--primary-gold);
+    font-weight: bold;
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 5px var(--primary-gold));
+}

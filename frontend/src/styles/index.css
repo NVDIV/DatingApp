@@ -1,0 +1,45 @@
+:root {
+  --bg-dark: #0a0912;
+  --bg-gradient: linear-gradient(135deg, #0a0912 0%, #1a1635 50%, #0a0912 100%);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --primary-gold: #d4af37;
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --text-main: #f0f0f0;
+  --text-muted: rgba(255, 255, 255, 0.6);
+  --error-red: #ff4d4d;
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: 'Inter', sans-serif;
+  color: var(--primary-gold);
+  letter-spacing: 1px;
+}
+
+.loading {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary-gold);
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+}

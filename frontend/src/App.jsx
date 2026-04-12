@@ -1,47 +1,55 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext'; // Не забудь про сокеты здесь или в main.jsx
+import ProtectedRoute from './components/ProtectedRoute';
+
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import OnboardingPage from './pages/OnboardingPage';
+import RegisterPage from './pages/RegisterPage'; // Добавили
 import FeedPage from './pages/FeedPage';
-import MatchesPage from './pages/MatchesPage'; // Імпортуємо нову сторінку
-import './styles/global.css';
+import ChatPage from './pages/ChatPage';
+import MatchesPage from './pages/MatchesPage'; // Добавили (список метчей)
+import OnboardingPage from './pages/OnboardingPage';
 
 function App() {
-  const isAuthenticated = () => !!localStorage.getItem('token');
+    return (
+        <AuthProvider>
+            <SocketProvider>
+                <BrowserRouter>
+                    <Routes>
+                        {/* Публічні маршрути */}
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        
+                        {/* Захищені маршрути */}
+                        <Route path="/feed" element={
+                            <ProtectedRoute><FeedPage /></ProtectedRoute>
+                        } />
+                        
+                        {/* Список взаємних симпатій */}
+                        <Route path="/matches" element={
+                            <ProtectedRoute><MatchesPage /></ProtectedRoute>
+                        } />
 
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        
-        {/* Чистий онбординг БЕЗ меню */}
-        <Route 
-          path="/onboarding" 
-          element={isAuthenticated() ? <OnboardingPage showMenu={false} /> : <Navigate to="/login" />} 
-        />
+                        {/* Конкретний чат */}
+                        <Route path="/chat/:matchId" element={
+                            <ProtectedRoute><ChatPage /></ProtectedRoute>
+                        } />
 
-        {/* Сторінки З меню */}
-        <Route 
-          path="/feed" 
-          element={isAuthenticated() ? <><Navbar /><FeedPage /></> : <Navigate to="/login" />} 
-        />
-        
-        <Route 
-          path="/matches" 
-          element={isAuthenticated() ? <><Navbar /><MatchesPage /></> : <Navigate to="/login" />} 
-        />
+                        {/* Редагування профілю / Онбординг */}
+                        <Route path="/onboarding" element={
+                            <ProtectedRoute><OnboardingPage /></ProtectedRoute>
+                        } />
 
-        <Route 
-          path="/profile" 
-          element={isAuthenticated() ? <><Navbar /><OnboardingPage showMenu={true} /></> : <Navigate to="/login" />} 
-        />
-
-        <Route path="/" element={<Navigate to="/login" />} />
-      </Routes>
-    </Router>
-  );
+                        {/* Автоматичний редирект: якщо залогінений — у стрічку, якщо ні — ProtectedRoute відправить на login */}
+                        <Route path="/" element={<Navigate to="/feed" />} />
+                        
+                        {/* Обробка неіснуючих сторінок */}
+                        <Route path="*" element={<Navigate to="/feed" />} />
+                    </Routes>
+                </BrowserRouter>
+            </SocketProvider>
+        </AuthProvider>
+    );
 }
 
 export default App;
