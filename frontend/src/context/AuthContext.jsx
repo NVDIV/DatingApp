@@ -4,7 +4,7 @@ import api from '../api/axiosConfig';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null); // Тут буде наш UserProfileDTO з UUID!
+    const [user, setUser] = useState(null); 
     const [loading, setLoading] = useState(true);
 
     const fetchMe = async () => {
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
         try {
             const response = await api.get('/users/me');
-            setUser(response.data); // Зберігаємо весь об'єкт, включаючи ID
+            setUser(response.data); 
         } catch (err) {
             console.error("Не вдалося завантажити профіль", err);
             localStorage.removeItem('token');
@@ -31,10 +31,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (authData) => {
-        // authData приходить з AuthService.java (token, userId, name...)
         localStorage.setItem('token', authData.token);
-        // Ми могли б одразу setUser(authData), але краще зробити fetchMe, 
-        // щоб отримати повний профіль з арканами та фото
         await fetchMe();
     };
 

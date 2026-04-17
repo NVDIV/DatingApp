@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import api from '../api/axiosConfig';
-import '../styles/chat.css'; // Не забудь створити цей файл
+import '../styles/chat.css';
 
 export default function ChatPage() {
     const { matchId } = useParams();
@@ -13,6 +13,7 @@ export default function ChatPage() {
     
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
+    const [loading, setLoading] = useState(true);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -24,37 +25,38 @@ export default function ChatPage() {
     }, [messages]);
 
     useEffect(() => {
-        api.get(`/messages/${matchId}`).then(res => {
-            const history = res.data.content ? res.data.content : res.data;
-            setMessages(history.slice().reverse());
-        });
+        setLoading(true);
+        api.get(`/messages/${matchId}`)
+            .then(res => {
+                const history = res.data.content ? res.data.content : res.data;
+                setMessages(Array.isArray(history) ? [...history].reverse() : []);
+            })
+            .catch(err => console.error("Помилка истории", err))
+            .finally(() => setLoading(false));
     }, [matchId]);
 
     useEffect(() => {
-        if (!stompClient) return;
+        if (!stompClient || !stompClient.connected) return;
 
-        const onMessageReceived = (frame) => {
+        console.log(`Subscribing to chat: ${matchId}`);
+        
+        const subscription = stompClient.subscribe(`/topic/messages/${matchId}`, (frame) => {
             const newMessage = JSON.parse(frame.body);
-            setMessages(prev => [...prev, newMessage]);
-        };
-
-        let subscription;
-        if (stompClient.connected) {
-            subscription = stompClient.subscribe(`/topic/messages/${matchId}`, onMessageReceived);
-        } else {
-            const originalOnConnect = stompClient.onConnect;
-            stompClient.onConnect = (frame) => {
-                if (originalOnConnect) originalOnConnect(frame);
-                subscription = stompClient.subscribe(`/topic/messages/${matchId}`, onMessageReceived);
-            };
-        }
+            setMessages(prev => {
+                if (prev.find(m => m.id === newMessage.id && m.id !== undefined)) return prev;
+                return [...prev, newMessage];
+            });
+        });
 
         return () => {
-            if (subscription) subscription.unsubscribe();
+            console.log(`Unsubscribing from chat: ${matchId}`);
+            subscription.unsubscribe();
         };
-    }, [stompClient, matchId]);
+    }, [stompClient, stompClient?.connected, matchId]);
 
-    const sendMessage = () => {
+    const sendMessage = (e) => {
+        if (e) e.preventDefault();
+        
         if (stompClient && stompClient.connected && inputValue.trim()) {
             const chatMessage = {
                 matchId: parseInt(matchId),
@@ -67,47 +69,60 @@ export default function ChatPage() {
                 destination: `/app/chat.sendMessage/${matchId}`,
                 body: JSON.stringify(chatMessage)
             });
+            
             setInputValue('');
         }
     };
+
+    if (!user) return null;
 
     return (
         <div className="chat-page-container">
             <div className="chat-window">
                 <div className="chat-header">
                     <button onClick={() => navigate('/matches')} className="back-btn">←</button>
-                    <span className="chat-title">Магія Спілкування</span>
+                    <div className="chat-user-info">
+                        <span className="chat-title">Магія Спілкування</span>
+                        <span className="online-status">у мережі</span>
+                    </div>
                 </div>
 
                 <div className="messages-display">
-                    {messages.map((msg, index) => (
-                        <div 
-                            key={index} 
-                            className={`message-row ${msg.senderId === user.id ? 'my-msg' : 'their-msg'}`}
-                        >
-                            <div className="bubble">
-                                <p>{msg.content}</p>
-                                <span className="message-time">
-                                    {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                </span>
+                    {loading ? (
+                        <div className="chat-loading">Завантаження послань...</div>
+                    ) : (
+                        messages.map((msg, index) => (
+                            <div 
+                                key={msg.id || index} 
+                                className={`message-row ${msg.senderId === user.id ? 'my-msg' : 'their-msg'}`}
+                            >
+                                <div className="bubble">
+                                    <p>{msg.content}</p>
+                                    <span className="message-time">
+                                        {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                     <div ref={messagesEndRef} />
                 </div>
 
-                <div className="chat-input-area">
+                <form className="chat-input-area" onSubmit={sendMessage}>
                     <input 
                         className="custom-input"
                         value={inputValue} 
                         onChange={(e) => setInputValue(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                         placeholder="Напишіть послання..."
                     />
-                    <button className="send-btn" onClick={sendMessage} disabled={!inputValue.trim()}>
+                    <button 
+                        type="submit"
+                        className="send-btn" 
+                        disabled={!inputValue.trim() || !stompClient?.connected}
+                    >
                         🔮
                     </button>
-                </div>
+                </form>
             </div>
         </div>
     );

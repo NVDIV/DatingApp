@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
+import { toast } from 'react-hot-toast';
 import '../styles/matches.css';
 
 export default function MatchesPage() {
@@ -9,14 +10,27 @@ export default function MatchesPage() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        api.get('/matches')
-            .then(res => setMatches(res.data))
-            .catch(err => console.error("Помилка метчів", err))
-            .finally(() => setLoading(false));
+useEffect(() => {
+        const fetchMatches = async () => {
+            try {
+                const res = await api.get('/matches');
+                setMatches(res.data);
+            } catch (err) {
+                console.error("Помилка при завантаженні метчів", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMatches();
     }, []);
 
-    if (loading) return <div className="loading">Шукаємо ваші зв'язки...</div>;
+    if (loading) return (
+        <div className="loading-screen">
+            <div className="loader"></div>
+            <p>Зчитуємо вібрації зірок...</p>
+        </div>
+    );
 
     return (
         <div className="page-with-nav">
@@ -28,7 +42,6 @@ export default function MatchesPage() {
                     <div className="matches-grid">
                         {matches.map(match => (
                             <div key={match.matchId} className="match-card"> 
-                                <img src={match.photos?.[0]?.url || '/assets/arcana/default.png'} alt={match.name} />
                                 <div className="match-info">
                                     <h3>{match.name}</h3>
                                     <button onClick={() => navigate(`/chat/${match.matchId}`)}>

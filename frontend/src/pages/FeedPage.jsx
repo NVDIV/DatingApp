@@ -1,61 +1,105 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import Navbar from '../components/Navbar';
+import { toast } from 'react-hot-toast';
 import '../styles/feed.css';
 
 export default function FeedPage() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isSwiping, setIsSwiping] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        api.get('/feed')
-            .then(response => {
-                setUsers(response.data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Помилка завантаження стрічки", err);
-                setLoading(false);
-            });
+        fetchFeed();
     }, []);
 
-    // Універсальна функція для свайпів
-    const handleSwipe = async (targetUserId, type) => {
+    const fetchFeed = async (isAppend = false) => {
         try {
-            // Відправляємо запит на бекенд (тепер і для LIKE, і для DISLIKE)
-            await api.post('/swipes', {
-                targetUserId: targetUserId,
-                swipeType: type // 'LIKE' або 'DISLIKE'
-            });
-
-            // Після успішної відповіді видаляємо верхню картку
-            setUsers(prev => prev.filter(u => u.id !== targetUserId));
+            // Если мы просто догружаем, не показываем глобальный лоадер
+            if (!isAppend) setLoading(true);
             
+            const response = await api.get('/feed');
+            const newUsers = response.data;
+
+            if (isAppend) {
+                // Добавляем только тех, кого еще нет в списке
+                setUsers(prev => {
+                    const existingIds = new Set(prev.map(u => u.id));
+                    const uniqueNew = newUsers.filter(u => !existingIds.has(u.id));
+                    return [...prev, ...uniqueNew];
+                });
+            } else {
+                setUsers(newUsers);
+            }
         } catch (err) {
-            console.error(`Не вдалося виконати ${type}:`, err);
-            // Можна додати сповіщення користувачу, якщо запит не пройшов
+            console.error("Помилка завантаження стрічки", err);
+            toast.error("Не вдалося оновити зірки");
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) return <div className="loading">Завантаження анкет...</div>;
+    const handleSwipe = async (targetUserId, type) => {
+        if (isSwiping) return;
+        
+        setIsSwiping(true);
+        try {
+            const response = await api.post('/swipes', {
+                targetUserId: targetUserId,
+                swipeType: type
+            });
+
+            if (type === 'LIKE' && response.data.isMatch) {
+                toast('Це доля! У вас новий мэтч!', {
+                    icon: '💖',
+                    duration: 4000,
+                    style: { borderRadius: '10px', background: '#333', color: '#fff' },
+                });
+            }
+
+            // Удаляем текущего юзера
+            const updatedUsers = users.filter(u => u.id !== targetUserId);
+            setUsers(updatedUsers);
+
+            // АВТО-ПОДГРУЗКА: если осталось мало людей (например, 2), грузим еще
+            if (updatedUsers.length <= 2) {
+                fetchFeed(true);
+            }
+            
+        } catch (err) {
+            console.error(`Не вдалося виконати ${type}:`, err);
+        } finally {
+            setIsSwiping(false);
+        }
+    };
+
+    if (loading) return (
+        <div className="loading-screen">
+            <div className="loader"></div>
+            <p>Зірки готують анкети...</p>
+        </div>
+    );
 
     return (
         <div className="page-with-nav">
             <div className="feed-container">
                 <div className="card-stack">
                     {users.length > 0 ? (
-                        // Беремо тільки першого юзера з масиву
+                        // Рендерим только ПЕРВУЮ карточку из массива
                         users.slice(0, 1).map(u => (
-                            <div key={u.id} className="tinder-card">
+                            <div key={u.id} className="tinder-card active">
                                 <div className="card-image-wrapper">
                                     <img 
-                                        src={u.mainPhotoUrl || 'default_pfp.png'} 
+                                        src={u.mainPhotoUrl && u.mainPhotoUrl !== 'default-avatar.png' ? u.mainPhotoUrl : '/default_pfp.png'} 
                                         className="card-main-photo" 
                                         alt={u.name} 
+                                        onError={(e) => { e.target.src = '/default_pfp.png'; }}
                                     />
                                     <div className="compatibility-badge">
                                         <span className="percent">{u.compatibilityPercent}%</span>
-                                        <span className="label">сумісність</span>
+                                        <span className="label">доля</span>
                                     </div>
                                 </div>
 
@@ -66,34 +110,46 @@ export default function FeedPage() {
                                     </div>
                                     
                                     <div className="compatibility-info">
-                                        <h4>Ваш спільний Аркан: <span>{u.pairArcanaName}</span></h4>
+                                        <h4>Спільний Аркан: <span>{u.pairArcanaName}</span></h4>
                                         <p>{u.pairDescription}</p>
                                     </div>
 
                                     <div className="card-actions">
-                                        {/* Викликаємо handleSwipe з типом DISLIKE */}
                                         <button 
+                                            disabled={isSwiping}
                                             className="action-btn skip" 
                                             onClick={() => handleSwipe(u.id, 'DISLIKE')}
-                                        >
-                                            ✕
-                                        </button>
+                                        >✕</button>
                                         
-                                        {/* Викликаємо handleSwipe з типом LIKE */}
                                         <button 
+                                            disabled={isSwiping}
                                             className="action-btn like" 
                                             onClick={() => handleSwipe(u.id, 'LIKE')}
-                                        >
-                                            ✨
-                                        </button>
+                                        >✨</button>
                                     </div>
                                 </div>
                             </div>
                         ))
                     ) : (
                         <div className="empty-feed">
-                            <h3>Аркани кажуть, що поки нікого немає...</h3>
-                            <p>Спробуйте зайти пізніше або змінити налаштування пошуку</p>
+                            <div className="empty-icon">🌟</div>
+                            <h3>Це все на сьогодні!</h3>
+                            <p>Аркани кажуть, що нові люди з'являться згодом.</p>
+                            <button 
+                                className="refresh-btn" 
+                                onClick={() => fetchFeed()}
+                                style={{
+                                    marginTop: '20px',
+                                    padding: '10px 20px',
+                                    borderRadius: '20px',
+                                    border: 'none',
+                                    background: 'var(--primary-color, #ff4b2b)',
+                                    color: 'white',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Оновити зірки
+                            </button>
                         </div>
                     )}
                 </div>
