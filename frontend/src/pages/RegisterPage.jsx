@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 import { Input, Button } from '../components/UIComponents';
-import { toast } from 'react-hot-toast'; // Не забудь импорт
+import { toast } from 'react-hot-toast'; 
 import '../styles/auth.css';
 
 export default function RegisterPage() {
@@ -28,17 +28,12 @@ export default function RegisterPage() {
         try {
             const response = await api.post('/auth/register', formData);
             
-            // Сохраняем данные пользователя
             await login(response.data); 
             
-            // Радостное уведомление
             toast.success("Вітаємо! Ваш шлях починається.");
             
-            // На онбординг
             navigate('/onboarding');
         } catch (error) {
-            // Ошибка 400 (например, < 18 лет) теперь автоматически 
-            // всплывет через интерцептор в axiosConfig.
             console.error("Registration failed", error);
         } finally {
             setIsSubmitting(false);

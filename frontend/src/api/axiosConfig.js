@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { toast } from 'react-hot-toast'; // Импортируем тосты
+import { toast } from 'react-hot-toast';
 
 const api = axios.create({
     baseURL: 'http://localhost:8080/api'
@@ -24,7 +24,6 @@ api.interceptors.response.use(
             localStorage.removeItem('token');
             window.location.href = '/login';
         } else if (status === 400) {
-            // Ошибка валидации или бизнес-логики (например, < 18 лет)
             toast.error(message || "Некоректні дані");
         } else if (status === 404) {
             toast.error("Ресурс не знайдено");

@@ -135,7 +135,6 @@ export default function FeedPage() {
                             <div className="empty-icon">🌟</div>
                             <h3>Це все на сьогодні!</h3>
                             <p>Аркани кажуть, що нові люди з'являться згодом.</p>
-                            {/* ИСПРАВЛЕНО: используем обычный button вместо Button */}
                             <button 
                                 className="refresh-btn" 
                                 onClick={() => fetchFeed()}

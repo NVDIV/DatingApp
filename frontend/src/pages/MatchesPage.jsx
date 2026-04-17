@@ -42,7 +42,6 @@ useEffect(() => {
                     <div className="matches-grid">
                         {matches.map(match => (
                             <div key={match.matchId} className="match-card"> 
-                                <img src={match.photos?.[0]?.url || '/assets/arcana/default.png'} alt={match.name} />
                                 <div className="match-info">
                                     <h3>{match.name}</h3>
                                     <button onClick={() => navigate(`/chat/${match.matchId}`)}>

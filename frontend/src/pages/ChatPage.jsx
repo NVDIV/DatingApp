@@ -20,25 +20,21 @@ export default function ChatPage() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // Автопрокрутка при новых сообщениях
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // 1. Загрузка истории сообщений
     useEffect(() => {
         setLoading(true);
         api.get(`/messages/${matchId}`)
             .then(res => {
                 const history = res.data.content ? res.data.content : res.data;
-                // Разворачиваем историю, если бэкенд отдает от новых к старым
                 setMessages(Array.isArray(history) ? [...history].reverse() : []);
             })
             .catch(err => console.error("Помилка истории", err))
             .finally(() => setLoading(false));
     }, [matchId]);
 
-    // 2. Подписка на сокеты
     useEffect(() => {
         if (!stompClient || !stompClient.connected) return;
 
@@ -46,7 +42,6 @@ export default function ChatPage() {
         
         const subscription = stompClient.subscribe(`/topic/messages/${matchId}`, (frame) => {
             const newMessage = JSON.parse(frame.body);
-            // Добавляем сообщение, только если его еще нет в списке (защита от дублей)
             setMessages(prev => {
                 if (prev.find(m => m.id === newMessage.id && m.id !== undefined)) return prev;
                 return [...prev, newMessage];
@@ -75,7 +70,7 @@ export default function ChatPage() {
                 body: JSON.stringify(chatMessage)
             });
             
-            setInputValue(''); // Мгновенная очистка
+            setInputValue('');
         }
     };
 
