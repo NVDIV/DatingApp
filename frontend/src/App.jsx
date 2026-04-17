@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext'; // Не забудь про сокеты здесь или в main.jsx
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage'; // Добавили
@@ -14,6 +15,7 @@ function App() {
     return (
         <AuthProvider>
             <SocketProvider>
+                <Toaster position="top-right" reverseOrder={false} />
                 <BrowserRouter>
                     <Routes>
                         {/* Публічні маршрути */}

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Импорт контекста
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 import { Input, Button } from '../components/UIComponents';
+import { toast } from 'react-hot-toast'; // Не забудь импорт
 import '../styles/auth.css';
 
 export default function RegisterPage() {
@@ -27,13 +28,18 @@ export default function RegisterPage() {
         try {
             const response = await api.post('/auth/register', formData);
             
-            // Вызываем login из контекста, чтобы приложение "увидело" юзера
+            // Сохраняем данные пользователя
             await login(response.data); 
             
-            // После регистрации сразу на онбординг
+            // Радостное уведомление
+            toast.success("Вітаємо! Ваш шлях починається.");
+            
+            // На онбординг
             navigate('/onboarding');
         } catch (error) {
-            alert("Помилка реєстрації: " + (error.response?.data?.message || "Перевірте дані"));
+            // Ошибка 400 (например, < 18 лет) теперь автоматически 
+            // всплывет через интерцептор в axiosConfig.
+            console.error("Registration failed", error);
         } finally {
             setIsSubmitting(false);
         }
@@ -46,7 +52,7 @@ export default function RegisterPage() {
                 <form onSubmit={handleRegister} className="auth-form">
                     <Input name="name" placeholder="Ім'я" onChange={handleChange} required />
                     <Input name="email" type="email" placeholder="Email" onChange={handleChange} required />
-                    <Input name="password" type="password" placeholder="Пароль" onChange={handleChange} required />
+                    <Input name="password" type="password" placeholder="Пароль" onChange={handleChange} required minLength={6} />
                     <Input name="city" placeholder="Місто" onChange={handleChange} required />
                     
                     <label className="field-label">Дата народження</label>

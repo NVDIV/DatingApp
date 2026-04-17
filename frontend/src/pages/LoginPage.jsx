@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // Импортируем наш хук
+import { useAuth } from '../context/AuthContext'; 
 import api from '../api/axiosConfig';
 import { Input, Button } from '../components/UIComponents';
+import { toast } from 'react-hot-toast'; // Импортируем для успеха
 import '../styles/auth.css';
 
 export default function LoginPage() {
@@ -11,7 +12,7 @@ export default function LoginPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const navigate = useNavigate();
-    const { login } = useAuth(); // Достаем функцию login из контекста
+    const { login } = useAuth();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -24,16 +25,16 @@ export default function LoginPage() {
                 password: password
             });
 
-            // ВАЖНО: Вызываем login из контекста. 
-            // Она сама сохранит токен и запустит fetchMe()
             await login(response.data); 
-
-            // Переход на ленту теперь будет успешным, 
-            // так как AuthContext уже будет знать пользователя
+            
+            // Приятное уведомление при входе
+            toast.success("З поверненням у Destiny!"); 
+            
             navigate('/feed');
         } catch (error) {
-            const errorMsg = error.response?.data?.message || "Невірні дані для входу";
-            alert("Помилка: " + errorMsg);
+            // Ошибка (401 или 404) автоматически обработается в axiosConfig
+            // и покажет тост с текстом "Невірні дані для входу" или подобным.
+            console.error("Login error", error);
         } finally {
             setIsSubmitting(false);
         }
